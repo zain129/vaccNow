@@ -27,3 +27,9 @@ INSERT INTO dose (dose_id, branch_id, vaccine_id, dosage_quantity, created, upda
 INSERT INTO dose (dose_id, branch_id, vaccine_id, dosage_quantity, created, updated) VALUES (5, 3, 2, 50, current_timestamp, null);
 INSERT INTO dose (dose_id, branch_id, vaccine_id, dosage_quantity, created, updated) VALUES (6, 4, 3, 10, current_timestamp, null);
 INSERT INTO dose (dose_id, branch_id, vaccine_id, dosage_quantity, created, updated) VALUES (7, 5, 1, 1000, current_timestamp, null);
+
+-- schedule data
+INSERT INTO schedule(schedule_id, branch_id, patient_id, status, start_time, end_time, date, created, updated) VALUES (1, 1, 1, true, '0715', '0730', current_date+2, current_timestamp, null);
+INSERT INTO schedule(schedule_id, branch_id, patient_id, status, start_time, end_time, date, created, updated) VALUES (2, 1, 2, true, '0815', '0830', current_date+2, current_timestamp, null);
+INSERT INTO schedule(schedule_id, branch_id, patient_id, status, start_time, end_time, date, created, updated) VALUES (3, 1, 3, true, '1430', '1445', current_date+2, current_timestamp, null);
+INSERT INTO schedule(schedule_id, branch_id, patient_id, status, start_time, end_time, date, created, updated) VALUES (4, 2, 4, true, '1000', '1015', current_date+2, current_timestamp, null);

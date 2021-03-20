@@ -13,12 +13,14 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service("branchService")
@@ -74,6 +76,11 @@ public class BranchServiceImpl implements BranchService {
     public List<BranchAvailabiltyDto> getBranchAvailability(String date, String startTime, String endTime) throws ParseException {
         List<BranchAvailabiltyDto> result = new ArrayList<>();
         try {
+            if (date == null || date.isEmpty() || startTime == null
+                    || startTime.isEmpty() || endTime == null || endTime.isEmpty()) {
+                throw new ParseException("Please provide the 3 required params (date, startTime, endTime).", 1);
+            }
+
             DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
             Date parseDate = dateFormat.parse(date);
 
@@ -96,11 +103,91 @@ public class BranchServiceImpl implements BranchService {
 
                 List<Schedule> scheduleByBranchId = branch.getScheduleByBranchId();
                 branchAvailabilty.setAvailable(scheduleByBranchId.isEmpty() ? false : true);
-
+//                0323 4422123
                 result.add(branchAvailabilty);
             }
         } catch (ParseException e) {
-            throw e;
+            throw new ParseException(
+                    "Please provide the 3 required params (date, startTime, endTime). Also, please check date and time format. " +
+                            "Date format 'ddMMyyyy' (01012020), Time Format 'HHmm' (1300)",
+                    e.getErrorOffset());
+        }
+        return result;
+    }
+
+    @Override
+    public List<BranchAvailabiltyDto> getBranchAvailabilityByDate(Integer branchId, String date) throws ParseException {
+        List<BranchAvailabiltyDto> result = new ArrayList<>();
+        try {
+            if (date == null || date.isEmpty()) {
+                throw new ParseException("", 1);
+            }
+            DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
+            Date parseDate = dateFormat.parse(date);
+            Timestamp dated = new Timestamp(parseDate.getTime());
+
+//            List<Branch> branchList = branchRepository.findAll();
+//            for (int i = 0; i < branchList.size(); i++) {
+//                Branch branch = branchList.get(i);
+            Branch branch = branchRepository.getOne(branchId);
+
+            BranchDto branchDto = new BranchDto();
+            branchDto.setBranchId(branch.getBranchId());
+            branchDto.setName(branch.getName());
+            branchDto.setOpenAt(branch.getOpenAt());
+            branchDto.setCloseAt(branch.getCloseAt());
+            branchDto.setCreated(branch.getCreated());
+            branchDto.setUpdated(branch.getUpdated());
+
+            List<Schedule> scheduleByBranchId = branch.getScheduleByBranchId();
+
+            if (!scheduleByBranchId.isEmpty()) {
+                scheduleByBranchId = scheduleByBranchId.stream()
+                        .filter(obj -> obj.getDate().equals(dated))
+                        .collect(Collectors.toList());
+            }
+
+            if (scheduleByBranchId.isEmpty()) {
+                BranchAvailabiltyDto branchAvailabilty = new BranchAvailabiltyDto();
+                branchAvailabilty.setBranchId(branchDto.getBranchId());
+                branchAvailabilty.setBranchName(branchDto.getName());
+                branchAvailabilty.setDate(parseDate);
+                branchAvailabilty.setStartTime(branchDto.getOpenAt());
+                branchAvailabilty.setEndTime(branchDto.getCloseAt());
+                branchAvailabilty.setAvailable(true);
+
+                result.add(branchAvailabilty);
+            } else {
+                for (int j = 0; j < scheduleByBranchId.size(); j++) {
+                    BranchAvailabiltyDto branchAvailabilty = new BranchAvailabiltyDto();
+                    Schedule schedule = scheduleByBranchId.get(j);
+                    if (schedule.getStartTime().after(branchDto.getOpenAt())) {
+                        branchAvailabilty.setBranchId(branchDto.getBranchId());
+                        branchAvailabilty.setBranchName(branchDto.getName());
+                        branchAvailabilty.setDate(parseDate);
+                        branchAvailabilty.setStartTime(branchDto.getOpenAt());
+                        branchAvailabilty.setEndTime(schedule.getStartTime());
+                        branchAvailabilty.setAvailable(true);
+
+                        branchDto.setOpenAt(schedule.getEndTime());
+                    }
+                    result.add(branchAvailabilty);
+                }
+                if (branchDto.getOpenAt().before(branchDto.getCloseAt())) {
+                    BranchAvailabiltyDto branchAvailabilty = new BranchAvailabiltyDto();
+                    branchAvailabilty.setBranchId(branchDto.getBranchId());
+                    branchAvailabilty.setBranchName(branchDto.getName());
+                    branchAvailabilty.setDate(parseDate);
+                    branchAvailabilty.setStartTime(branchDto.getOpenAt());
+                    branchAvailabilty.setEndTime(branchDto.getCloseAt());
+                    branchAvailabilty.setAvailable(true);
+                    result.add(branchAvailabilty);
+                }
+            }
+//            }
+        } catch (ParseException e) {
+            throw new ParseException(
+                    "Please provide the date in a valid format 'ddMMyyyy' (01012020)", e.getErrorOffset());
         }
         return result;
     }

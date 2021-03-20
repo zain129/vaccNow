@@ -9,6 +9,10 @@ import java.util.List;
 
 public interface BranchService {
     List<BranchDto> getAllBranches();
+
     List<BranchVaccinesDto> getAvailableVaccincesPerBranch();
+
     List<BranchAvailabiltyDto> getBranchAvailability(String date, String startTime, String endTime) throws ParseException;
+
+    List<BranchAvailabiltyDto> getBranchAvailabilityByDate(Integer branchId, String date) throws ParseException;
 }

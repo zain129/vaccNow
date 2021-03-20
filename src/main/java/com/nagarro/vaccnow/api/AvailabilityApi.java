@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Time;
 import java.text.ParseException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/availability")
 public class AvailabilityApi {
 
     @Autowired
@@ -28,7 +29,7 @@ public class AvailabilityApi {
      *
      * @return
      */
-    @GetMapping("/availability/allBranches")
+    @GetMapping("/allBranches")
     public ResponseEntity allBranches() {
         List<BranchDto> allBranches = null;
         int status = HttpStatus.NOT_FOUND.value();
@@ -52,7 +53,7 @@ public class AvailabilityApi {
      *
      * @return
      */
-    @GetMapping("/availability/branchVaccines")
+    @GetMapping("/branchVaccines")
     public ResponseEntity vaccinesPerBranch() {
         List<BranchVaccinesDto> branchVaccinesDtos = null;
         int status = HttpStatus.NOT_FOUND.value();
@@ -74,8 +75,9 @@ public class AvailabilityApi {
     /**
      * Get a specific availability by branch
      *
-     * @param startTime: start Date Time
-     * @param endTime:   end Date Time
+     * @param date:      Format 'ddMMyyyy'
+     * @param startTime: Format 'HHmm'
+     * @param endTime:   Format 'HHmm'
      * @return
      */
     @GetMapping("/searchBranchAvailability")
@@ -89,35 +91,45 @@ public class AvailabilityApi {
         try {
             branchVaccinesDtos = branchService.getBranchAvailability(date, startTime, endTime);
             status = HttpStatus.OK.value();
-            result.put("status", status);
-            result.put("vaccinesPerBranch", branchVaccinesDtos);
         } catch (Exception ex) {
             if (ex.getClass().equals(ParseException.class)) {
-                result.put("error",
-                        "Please check date and time format. Date format 'ddMMyyyy' (01012020), Time Format 'HHmm' (1300)");
+                result.put("error", ex.getLocalizedMessage());
             }
-            result.put("status", status);
-            result.put("vaccinesPerBranch", null);
             System.out.println("Exception in vaccinesPerBranch: " + ex.getLocalizedMessage());
             ex.printStackTrace();
         }
 
+        result.put("status", status);
+        result.put("vaccinesPerBranch", branchVaccinesDtos);
         return ResponseEntity.ok(result);
     }
 
     /**
      * Get available time for a branch.
      *
-     * @param availabilityDate: Time portion will be discarded and only date will be used to search for records.
+     * @param branchId: Integer @NotNull
+     * @param date: Format 'ddMMyyyy'
      * @return
      */
-    @GetMapping("/branchAvailabilityByDate/")
-    public ResponseEntity branchAvailabilityByDate(@RequestParam(value = "availabilityDate") Date availabilityDate) {
-        List<Time> times = new ArrayList<>();
-
+    @GetMapping("/branchAvailabilityByDate")
+    public ResponseEntity branchAvailabilityByDate(@RequestParam(value = "branchId") Integer branchId,
+                                                   @RequestParam(value = "date") String date) {
         Map result = new HashMap();
-//        result.put("Date", availabilityDate.getDate());
-//        result.put("Time", times);
+        List<BranchAvailabiltyDto> branchAvailabiltyDtos = null;
+        int status = HttpStatus.NOT_FOUND.value();
+
+        try {
+            branchAvailabiltyDtos = branchService.getBranchAvailabilityByDate(branchId, date);
+            status = HttpStatus.OK.value();
+        } catch (Exception ex) {
+            if (ex.getClass().equals(ParseException.class)) {
+                result.put("error", ex.getLocalizedMessage());
+            }
+            System.out.println("Exception in vaccinesPerBranch: " + ex.getLocalizedMessage());
+            ex.printStackTrace();
+        }
+        result.put("status", status);
+        result.put("branchAvailability", branchAvailabiltyDtos);
         return ResponseEntity.ok(result);
     }
 
