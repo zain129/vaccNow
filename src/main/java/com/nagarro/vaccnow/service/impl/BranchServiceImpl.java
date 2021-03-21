@@ -1,13 +1,13 @@
-package com.nagarro.vaccnow.service;
+package com.nagarro.vaccnow.service.impl;
 
 import com.nagarro.vaccnow.model.dto.BranchAvailabiltyDto;
 import com.nagarro.vaccnow.model.dto.BranchDto;
 import com.nagarro.vaccnow.model.dto.BranchVaccinesDto;
 import com.nagarro.vaccnow.model.jpa.Branch;
-import com.nagarro.vaccnow.model.jpa.Dose;
+import com.nagarro.vaccnow.model.jpa.BranchVaccinesJoin;
 import com.nagarro.vaccnow.model.jpa.Schedule;
-import com.nagarro.vaccnow.model.jpa.Vaccine;
 import com.nagarro.vaccnow.repo.BranchRepository;
+import com.nagarro.vaccnow.service.BranchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,23 +51,19 @@ public class BranchServiceImpl implements BranchService {
     @Override
     public List<BranchVaccinesDto> getAvailableVaccincesPerBranch() {
         List<BranchVaccinesDto> result = new ArrayList<>();
-        List<Branch> branchList = branchRepository.findAll();
-        for (int i = 0; i < branchList.size(); i++) {
-            Branch branch = branchList.get(i);
-            List<Dose> doseByBranchId = branch.getDoseByBranchId();
-            for (int j = 0; j < doseByBranchId.size(); j++) {
-                Dose dose = doseByBranchId.get(j);
-                Vaccine vaccine = dose.getVaccineByVaccineId();
-                BranchVaccinesDto branchVaccinesDto = new BranchVaccinesDto();
+        List<BranchVaccinesJoin> branchVaccines = branchRepository.getBranchVaccinesJoin();
 
-                branchVaccinesDto.setBranchId(branch.getBranchId());
-                branchVaccinesDto.setBranchName(branch.getName());
-                branchVaccinesDto.setVaccineId(vaccine.getVaccineId());
-                branchVaccinesDto.setVaccineName(vaccine.getName());
-                branchVaccinesDto.setVaccineQty(dose.getDosageQuantity());
+        for (int i = 0; i < branchVaccines.size(); i++) {
+            BranchVaccinesJoin branchVaccinesJoin = branchVaccines.get(i);
 
-                result.add(branchVaccinesDto);
-            }
+            BranchVaccinesDto branchVaccinesDto = new BranchVaccinesDto();
+            branchVaccinesDto.setBranchId(branchVaccinesJoin.getBranchId());
+            branchVaccinesDto.setBranchName(branchVaccinesJoin.getBranchName());
+            branchVaccinesDto.setVaccineId(branchVaccinesJoin.getVaccineId());
+            branchVaccinesDto.setVaccineName(branchVaccinesJoin.getVaccineName());
+            branchVaccinesDto.setVaccineQty(branchVaccinesJoin.getVaccineQty());
+
+            result.add(branchVaccinesDto);
         }
         return result;
     }
@@ -190,5 +186,10 @@ public class BranchServiceImpl implements BranchService {
                     "Please provide the date in a valid format 'ddMMyyyy' (01012020)", e.getErrorOffset());
         }
         return result;
+    }
+
+    @Override
+    public Branch getBranchById(Integer branchId) {
+        return branchRepository.getOne(branchId);
     }
 }

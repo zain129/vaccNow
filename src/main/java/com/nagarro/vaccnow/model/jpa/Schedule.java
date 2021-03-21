@@ -31,14 +31,16 @@ public class Schedule {
     @Basic
     @Column(name = "date", nullable = false)
     private Date date;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id", referencedColumnName = "branch_id", nullable = false)
     private Branch branchByBranchId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", referencedColumnName = "patient_id", nullable = false)
     private Patient patientByPatientId;
     @OneToMany(mappedBy = "scheduleByScheduleId")
     private List<Payment> paymentByScheduleId;
+    @OneToMany(mappedBy = "scheduleByScheduleId")
+    private List<Vaccination> vaccinationByScheduleId;
     @Basic
     @Column(name = "created", nullable = false, updatable = false)
     private Timestamp created;

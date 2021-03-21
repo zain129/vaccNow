@@ -48,18 +48,6 @@ CREATE TABLE IF NOT EXISTS patient (
     CONSTRAINT patient_pk PRIMARY KEY (patient_id)
 );
 
-CREATE TABLE IF NOT EXISTS vaccination (
-	vaccination_id integer NOT NULL,
-	dose_id integer NOT NULL,
-	patient_id integer NOT NULL,
-	date timestamp without time zone NOT NULL,
-	created timestamp without time zone,
-    updated timestamp without time zone,
-    CONSTRAINT vaccination_pk PRIMARY KEY (vaccination_id),
-	CONSTRAINT vaccination_fk FOREIGN KEY (dose_id) REFERENCES dose (dose_id),
-	CONSTRAINT vaccination_fk1 FOREIGN KEY (patient_id) REFERENCES patient (patient_id)
-);
-
 CREATE TABLE IF NOT EXISTS schedule (
 	schedule_id integer NOT NULL,
 	branch_id integer NOT NULL,
@@ -75,14 +63,28 @@ CREATE TABLE IF NOT EXISTS schedule (
 	CONSTRAINT schedule_fk1 FOREIGN KEY (patient_id) REFERENCES patient (patient_id)
 );
 
+CREATE TABLE IF NOT EXISTS vaccination (
+	vaccination_id integer NOT NULL,
+	dose_id integer NOT NULL,
+	patient_id integer NOT NULL,
+	schedule_id integer NOT NULL,
+	date timestamp without time zone NOT NULL,
+	created timestamp without time zone,
+    updated timestamp without time zone,
+    CONSTRAINT vaccination_pk PRIMARY KEY (vaccination_id),
+	CONSTRAINT vaccination_fk FOREIGN KEY (dose_id) REFERENCES dose (dose_id),
+	CONSTRAINT vaccination_fk1 FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
+	CONSTRAINT vaccination_fk2 FOREIGN KEY (schedule_id) REFERENCES schedule (schedule_id)
+);
+
 CREATE TABLE IF NOT EXISTS payment (
 	payment_id integer NOT NULL,
 	schedule_id integer NOT NULL,
 	mode character varying NOT NULL,
 	account_number  character varying NULL,
+	date timestamp without time zone NOT NULL,
 	created timestamp without time zone,
     updated timestamp without time zone,
     CONSTRAINT payment_pk PRIMARY KEY (payment_id),
 	CONSTRAINT payment_fk FOREIGN KEY (schedule_id) REFERENCES schedule (schedule_id)
 );
-

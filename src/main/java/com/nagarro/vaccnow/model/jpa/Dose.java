@@ -20,10 +20,10 @@ public class Dose {
     @Basic
     @Column(name = "dosage_quantity", nullable = true)
     private Integer dosageQuantity;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id", referencedColumnName = "branch_id", nullable = false)
     private Branch branchByBranchId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vaccine_id", referencedColumnName = "vaccine_id", nullable = false)
     private Vaccine vaccineByVaccineId;
 //    @ManyToOne

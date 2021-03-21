@@ -95,7 +95,7 @@ public class AvailabilityApi {
             if (ex.getClass().equals(ParseException.class)) {
                 result.put("error", ex.getLocalizedMessage());
             }
-            System.out.println("Exception in vaccinesPerBranch: " + ex.getLocalizedMessage());
+            System.out.println("Exception in searchBranchAvailability: " + ex.getLocalizedMessage());
             ex.printStackTrace();
         }
 
@@ -125,7 +125,7 @@ public class AvailabilityApi {
             if (ex.getClass().equals(ParseException.class)) {
                 result.put("error", ex.getLocalizedMessage());
             }
-            System.out.println("Exception in vaccinesPerBranch: " + ex.getLocalizedMessage());
+            System.out.println("Exception in branchAvailabilityByDate: " + ex.getLocalizedMessage());
             ex.printStackTrace();
         }
         result.put("status", status);
