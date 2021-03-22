@@ -1,5 +1,12 @@
 package com.nagarro.vaccnow.model.jpa;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class BranchVaccinesJoin implements java.io.Serializable {
     private Integer branchId;
     private String branchName;
@@ -15,43 +22,4 @@ public class BranchVaccinesJoin implements java.io.Serializable {
         this.vaccineQty = vaccineQty;
     }
 
-    public Integer getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(Integer branchId) {
-        this.branchId = branchId;
-    }
-
-    public String getBranchName() {
-        return branchName;
-    }
-
-    public void setBranchName(String branchName) {
-        this.branchName = branchName;
-    }
-
-    public Integer getVaccineId() {
-        return vaccineId;
-    }
-
-    public void setVaccineId(Integer vaccineId) {
-        this.vaccineId = vaccineId;
-    }
-
-    public String getVaccineName() {
-        return vaccineName;
-    }
-
-    public void setVaccineName(String vaccineName) {
-        this.vaccineName = vaccineName;
-    }
-
-    public Integer getVaccineQty() {
-        return vaccineQty;
-    }
-
-    public void setVaccineQty(Integer vaccineQty) {
-        this.vaccineQty = vaccineQty;
-    }
 }
