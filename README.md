@@ -2,12 +2,12 @@
 ##### An application for scheduling and record keeping for Covid-19 vaccination.
 
 ## Running the application
-Clone the project.
-Open in Intellij IDEA.
-Update/Download maven dependencies.
-Add a new Run/Debug configuration. (Ref: https://github.com/zain129/vaccNow/blob/master/run_debug_configuration_intellij.png)
-Run the project.
-Use the following examples to consume the APIs.
+- Clone the project.
+- Open in Intellij IDEA.
+- Update/Download maven dependencies.
+- Add a new Run/Debug configuration. (Ref: https://github.com/zain129/vaccNow/blob/master/run_debug_configuration_intellij.png)
+- Run the project.
+- Use the following examples to consume the APIs.
 
 ### REST APIs
 ##### Get a list of all branches
@@ -35,6 +35,8 @@ http://localhost:8081/vaccination/sendEmail
 http://localhost:8081/reporting/vaccPerBranch
 
 ##### Get a list of all applied vaccination per day/period
+- _if endDate is not set then vaccination per day is consumed_
+
 http://localhost:8081/reporting/vaccPerDayPeriod?startDate=23032021
 http://localhost:8081/reporting/vaccPerDayPeriod?startDate=21032021&endDate=23032021
 
