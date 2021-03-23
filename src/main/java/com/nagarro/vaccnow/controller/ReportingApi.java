@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,7 @@ public class ReportingApi {
      */
     @GetMapping("/vaccPerDayPeriod")
     public ResponseEntity vaccPerDayPeriod(
-            @RequestParam(value = "startDate") String startDate,
+            @RequestParam(value = "startDate") @NotBlank String startDate,
             @RequestParam(value = "endDate", required = false) String endDate) throws ParseException {
         List<AppliedVaccination> appliedVaccinationList = null;
         Map result = new HashMap();
@@ -69,8 +70,8 @@ public class ReportingApi {
      */
     @GetMapping("/confirmVaccOverPeriod")
     public ResponseEntity confirmVaccOverPeriod(
-            @RequestParam(value = "startDate") String startDate,
-            @RequestParam(value = "endDate") String endDate) throws ParseException {
+            @RequestParam(value = "startDate") @NotBlank String startDate,
+            @RequestParam(value = "endDate") @NotBlank String endDate) throws ParseException {
         Map result = new HashMap();
         result.put("status", HttpStatus.NOT_FOUND.value());
         result.put("data", reportingService.getListOfAppliedVaccinationPerPeriod(startDate, endDate));

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,9 +60,9 @@ public class BranchApi {
      */
     @GetMapping("/searchBranchAvailability")
     public ResponseEntity searchBranchAvailability(
-            @RequestParam(value = "date") String date,
-            @RequestParam(value = "startTime") String startTime,
-            @RequestParam(value = "endTime") String endTime) throws ParseException {
+            @RequestParam(value = "date") @NotBlank String date,
+            @RequestParam(value = "startTime") @NotBlank String startTime,
+            @RequestParam(value = "endTime") @NotBlank String endTime) throws ParseException {
         Map result = new HashMap();
         result.put("status", HttpStatus.OK.value());
         result.put("data", branchService.getBranchAvailability(date, startTime, endTime));
@@ -76,8 +78,8 @@ public class BranchApi {
      */
     @GetMapping("/branchAvailabilityByDate")
     public ResponseEntity branchAvailabilityByDate(
-            @RequestParam(value = "branchId") Integer branchId,
-            @RequestParam(value = "date") String date) throws ParseException {
+            @RequestParam(value = "branchId") @NotNull Integer branchId,
+            @RequestParam(value = "date") @NotBlank String date) throws ParseException {
         Map result = new HashMap();
         result.put("status", HttpStatus.OK.value());
         result.put("data", branchService.getBranchAvailabilityByDate(branchId, date));

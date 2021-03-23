@@ -40,7 +40,7 @@ public class VaccinationApi {
             @RequestParam(value = "branchId") @NotNull Integer branchId,
             @RequestParam(value = "patientId") @NotNull Integer patientId,
             @RequestParam(value = "vaccineId") @NotNull Integer vaccineId,
-            @RequestParam(value = "date") @NotBlank @Pattern(regexp = "ddMMyyyy") String date,
+            @RequestParam(value = "date") @NotBlank String date,
             @RequestParam(value = "startTime") @NotBlank String startTime) throws Exception {
         Map result = new HashMap();
         result.put("status", HttpStatus.OK.value());
