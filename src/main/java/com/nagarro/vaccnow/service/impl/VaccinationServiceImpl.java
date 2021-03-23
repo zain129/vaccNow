@@ -155,13 +155,12 @@ public class VaccinationServiceImpl implements VaccinationService {
 
     @Override
     public PaymentStatus madePayment(Integer scheduleId, String paymentMethod, String accountNumber) throws Exception {
-        PaymentStatus paymentStatus = null;
         if (scheduleId == null) {
             throw new Exception("Payment cannot be made. Schedule Id is missing.");
         }
 
         paymentMethod = paymentMethod.trim();
-        accountNumber = accountNumber.trim();
+        accountNumber = accountNumber != null ? accountNumber.trim() : accountNumber;
 
         if (paymentMethod.isEmpty()) {
             throw new Exception("Payment cannot be made. Patient Method is missing.");
@@ -176,6 +175,7 @@ public class VaccinationServiceImpl implements VaccinationService {
             throw new Exception("Payment cannot be made. Only these methods are allowed; Cash, Credit, and Fawry.");
         }
 
+        PaymentStatus paymentStatus = null;
         Schedule schedule = scheduleRepository.getOne(scheduleId);
         if (schedule == null) {
             throw new Exception("Payment cannot be made. Nothing is scheduled.");

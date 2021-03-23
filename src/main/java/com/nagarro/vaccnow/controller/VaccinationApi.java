@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Pattern;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,11 +37,11 @@ public class VaccinationApi {
      */
     @GetMapping("/scheduleSlot")
     public ResponseEntity scheduleSlot(
-            @RequestParam(value = "branchId") Integer branchId,
-            @RequestParam(value = "patientId") Integer patientId,
-            @RequestParam(value = "vaccineId") Integer vaccineId,
-            @RequestParam(value = "date") String date,
-            @RequestParam(value = "startTime") String startTime) throws Exception {
+            @RequestParam(value = "branchId") @NotNull Integer branchId,
+            @RequestParam(value = "patientId") @NotNull Integer patientId,
+            @RequestParam(value = "vaccineId") @NotNull Integer vaccineId,
+            @RequestParam(value = "date") @NotBlank @Pattern(regexp = "ddMMyyyy") String date,
+            @RequestParam(value = "startTime") @NotBlank String startTime) throws Exception {
         Map result = new HashMap();
         result.put("status", HttpStatus.OK.value());
         result.put("data",
@@ -55,8 +59,8 @@ public class VaccinationApi {
      */
     @GetMapping("/payment")
     public ResponseEntity payment(
-            @RequestParam(value = "scheduleId") Integer scheduleId,
-            @RequestParam(value = "paymentMethod") String paymentMethod,
+            @RequestParam(value = "scheduleId") @NotNull Integer scheduleId,
+            @RequestParam(value = "paymentMethod") @NotBlank String paymentMethod,
             @RequestParam(value = "accountNumber", required = false) String accountNumber) throws Exception {
         Map result = new HashMap();
         result.put("status", HttpStatus.OK.value());
