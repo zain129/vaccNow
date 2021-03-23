@@ -46,15 +46,4 @@ public interface BranchRepository extends JpaRepository<Branch, Integer> {
             " ORDER BY b.branchId ")
     List<AppliedVaccination> getAppVaccinationPerPeriod(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
-    /*
-    SELECT b.branch_id, b.name as branch_name,
-        v.vaccine_id, v.name as vaccine_name,
-        vn.vaccination_id, vn.date
-    FROM branch b, schedule s, vaccination vn, dose d, vaccine v
-    WHERE b.branch_id = s.branch_id
-    AND s.schedule_id = vn.schedule_id
-    AND vn.dose_id = d.dose_id
-    AND d.vaccine_id = v.vaccine_id
-     */
-
 }

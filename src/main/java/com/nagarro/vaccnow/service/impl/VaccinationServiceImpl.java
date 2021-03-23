@@ -1,5 +1,7 @@
 package com.nagarro.vaccnow.service.impl;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.nagarro.vaccnow.model.PaymentStatus;
 import com.nagarro.vaccnow.model.dto.BranchScheduleDto;
 import com.nagarro.vaccnow.model.jpa.*;
@@ -7,13 +9,11 @@ import com.nagarro.vaccnow.repo.*;
 import com.nagarro.vaccnow.service.BranchService;
 import com.nagarro.vaccnow.service.VaccinationService;
 import com.nagarro.vaccnow.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.mail.*;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -21,11 +21,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
-//@Transactional
 @Service("vaccinationService")
+@Slf4j
 public class VaccinationServiceImpl implements VaccinationService {
 
     @Autowired
@@ -100,8 +99,7 @@ public class VaccinationServiceImpl implements VaccinationService {
             if (schedule.getStartTime().equals(startTimeObj)
                     || schedule.getEndTime().equals(endTimeObj)
                     || Util.timeBetweenTwoTimeslots(schedule.getStartTime(), schedule.getEndTime(), startTime)
-                    || Util.timeBetweenTwoTimeslots(schedule.getStartTime(), schedule.getEndTime(), endTime)
-            ) {
+                    || Util.timeBetweenTwoTimeslots(schedule.getStartTime(), schedule.getEndTime(), endTime)) {
                 throw new Exception("Cannot schedule. This slot has already been assigned.");
             }
         }
@@ -129,7 +127,9 @@ public class VaccinationServiceImpl implements VaccinationService {
         Vaccination vaccination = new Vaccination();
         vaccination.setDoseByDoseId(doseByBranchIdAndVaccineId);
         vaccination.setPatientByPatientId(patient);
+        vaccination.setScheduleByScheduleId(newSchedule);
         vaccination.setVaccinationId(vaccinationRepository.getMaxId() + 1);
+        vaccination.setDate(dateObj);
         vaccination.setCreated(new Timestamp(new Date().getTime()));
         vaccination = vaccinationRepository.save(vaccination);
 
@@ -144,6 +144,11 @@ public class VaccinationServiceImpl implements VaccinationService {
         branchScheduleDto.setDate(dateObj);
         branchScheduleDto.setStartTime(startTimeObj);
         branchScheduleDto.setEndTime(endTimeObj);
+
+        /*
+         * Confirm scheduled vaccination by email
+         */
+        sendEmail();
 
         return branchScheduleDto;
     }
@@ -195,6 +200,12 @@ public class VaccinationServiceImpl implements VaccinationService {
                 paymentStatus.setPaymentDate(payment.getCreated());
                 paymentStatus.setPaymentMode(paymentMethod.toUpperCase());
                 paymentStatus.setScheduleId(scheduleId);
+
+                /*
+                 * Generate Vaccination Certificate (PDF)
+                 */
+                createPDF(patient.getName(), schedule.getDate(), schedule.getStartTime(), schedule.getEndTime(),
+                        payment.getMode(), payment.getAccountNumber());
             } else {
                 throw new Exception("A Payment has already been made.");
             }
@@ -202,61 +213,70 @@ public class VaccinationServiceImpl implements VaccinationService {
         return paymentStatus;
     }
 
-    @Override
+    private void createPDF(String name, Date date, Time startTime, Time endTime, String mode, String accountNumber)
+            throws IOException, DocumentException {
+        DateFormat dateFormat = new SimpleDateFormat("MMddyyyyHHmmss");
+        Date today = new Date();
+        String fileName = "vaccCert-" + name + "-" + dateFormat.format(today) + ".pdf";
+        Document document = new Document();
+        PdfWriter.getInstance(document, new FileOutputStream(fileName));
+        document.open();
+
+        Paragraph paragraph = new Paragraph();
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph("Vaccination Certificate",
+                new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD)));
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        document.add(paragraph);
+
+        paragraph = new Paragraph();
+        paragraph.setIndentationLeft(20);
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph("Name: " + name));
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph("Date: " + new SimpleDateFormat("MMM dd, yyyy").format(date)));
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph("Timeslot: " + startTime.toString() + " - " + endTime.toString()));
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph("Payment Mode: " + mode));
+        paragraph.add(new Paragraph(" "));
+        if (!mode.equalsIgnoreCase("cash")) {
+            paragraph.add(new Paragraph("Account Number: " + accountNumber));
+            paragraph.add(new Paragraph(" "));
+        }
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph(" "));
+        paragraph.add(new Paragraph(" "));
+        document.add(paragraph);
+
+        paragraph = new Paragraph();
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        paragraph.add(new Paragraph(
+                "This is a system generated document and does not required any signature.",
+                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL, BaseColor.RED)));
+
+        document.addTitle("Vaccination Certificate - " + name);
+        document.addSubject("Vaccination Certificate");
+        document.addAuthor("VaccNow-Nagarro");
+        document.addCreator("Zain Imtiaz");
+        document.add(paragraph);
+        document.close();
+
+        log.info("\n******************** VACCINATION CERTIFICATE GENERATED ********************: \n");
+        log.info("\n File Name: " + fileName + "\n\n");
+    }
+
     public void sendEmail() throws Exception {
         List<Schedule> schedules = scheduleRepository.findAll();
-
         for (Schedule obj : schedules) {
-//            if(!obj.isEmailSent()) {
             String msg = "Vaccination has been scheduled on " + obj.getDate() +
                     " from " + obj.getStartTime().toString() + " to " + obj.getEndTime().toString() +
                     " for " + obj.getPatientByPatientId().getName() +
                     " possessing national id " + obj.getPatientByPatientId().getNationalId() +
                     " at Branch " + obj.getBranchByBranchId().getName();
-
-            sendMail(msg);
-//              obj.setEmailSent(true);
-//              scheduleRepository.save(obj);
-//            }
+            log.info("\n******************** EMAIL SENT ********************: \n" + msg);
         }
-    }
-
-    private void sendMail(String msgBody) throws AddressException, MessagingException, IOException {
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", Util.getProperty("mail.smtp.auth"));
-        props.put("mail.smtp.starttls.enable", Util.getProperty("mail.smtp.starttls.enable"));
-        props.put("mail.smtp.host", Util.getProperty("mail.smtp.host"));
-        props.put("mail.smtp.port", Util.getProperty("mail.smtp.port"));
-
-        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                try {
-                    return new PasswordAuthentication(Util.getProperty("mail.sender.auth.username"),
-                            Util.getProperty("mail.sender.auth.password"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        });
-
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(Util.getProperty("mail.sender.auth.username"), false));
-
-        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(Util.getProperty("mail.receiver.email")));
-        msg.setSubject("Vaccination Scheduled");
-        msg.setContent(msgBody, "text/html");
-        msg.setSentDate(new Date());
-
-//        MimeBodyPart messageBodyPart = new MimeBodyPart();
-//        messageBodyPart.setContent(msgBody, "text/html");
-//        Multipart multipart = new MimeMultipart();
-//        multipart.addBodyPart(messageBodyPart);
-//        MimeBodyPart attachPart = new MimeBodyPart();
-//        attachPart.attachFile("/var/tmp/image19.png");
-//        multipart.addBodyPart(attachPart);
-//        msg.setContent(multipart);
-
-        Transport.send(msg);
     }
 }

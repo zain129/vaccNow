@@ -17,8 +17,6 @@ public class BranchDto {
     private String name;
     private Time openAt;
     private Time closeAt;
-    //  private List<DoseDto> doses;
-//  private List<ScheduleDto> schedules;
     private Timestamp created;
     private Timestamp updated;
 }

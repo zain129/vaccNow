@@ -122,11 +122,7 @@ public class BranchServiceImpl implements BranchService {
             Date parseDate = dateFormat.parse(date);
             Timestamp dated = new Timestamp(parseDate.getTime());
 
-//            List<Branch> branchList = branchRepository.findAll();
-//            for (int i = 0; i < branchList.size(); i++) {
-//                Branch branch = branchList.get(i);
             Branch branch = branchRepository.getOne(branchId);
-
             BranchDto branchDto = new BranchDto();
             branchDto.setBranchId(branch.getBranchId());
             branchDto.setName(branch.getName());
@@ -136,7 +132,6 @@ public class BranchServiceImpl implements BranchService {
             branchDto.setUpdated(branch.getUpdated());
 
             List<Schedule> scheduleByBranchId = branch.getScheduleByBranchId();
-
             if (!scheduleByBranchId.isEmpty()) {
                 scheduleByBranchId = scheduleByBranchId.stream()
                         .filter(obj -> obj.getDate().equals(dated))
@@ -151,7 +146,6 @@ public class BranchServiceImpl implements BranchService {
                 branchAvailabilty.setStartTime(branchDto.getOpenAt());
                 branchAvailabilty.setEndTime(branchDto.getCloseAt());
                 branchAvailabilty.setAvailable(true);
-
                 result.add(branchAvailabilty);
             } else {
                 for (int j = 0; j < scheduleByBranchId.size(); j++) {
@@ -180,7 +174,6 @@ public class BranchServiceImpl implements BranchService {
                     result.add(branchAvailabilty);
                 }
             }
-//            }
         } catch (ParseException e) {
             throw new ParseException(
                     "Please provide the date in a valid format 'ddMMyyyy' (01012020)", e.getErrorOffset());
