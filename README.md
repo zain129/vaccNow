@@ -1,7 +1,7 @@
 # Project: VaccNow
-##### An application for scheduling and record keeping for Covid-19 vaccination.
+###### *An application for scheduling and record keeping for Covid-19 vaccination. Email is sent once a vaccination a scheduled and a vaccination certificate is generated when payment is made.*
 
-##Table of Content
+## Table of Content
 - [Technologies](#technologies)
 - [ER Diagram](#er-diagram)
 - [Running the Application](#running-the-application)
@@ -11,7 +11,7 @@
 * Java 8
 * Springboot 2.4.1
 * PosgtreSQL Database
-* JUnit4
+* iTextPdf for PDF generation
 
 ## ER Diagram
 
