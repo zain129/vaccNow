@@ -12,6 +12,9 @@
 * Springboot 2.4.1
 * PosgtreSQL Database
 * iTextPdf for PDF generation
+* JUnit
+* Mockito
+* Project Lombok
 
 ## ER Diagram
 
@@ -24,13 +27,10 @@
     - **mvn clean install spring-boot:run**
     - **java -jar target/vaccnow-1.0-SNAPSHOT.jar**
 - Application will be running on port 8081.
-- Sample APIs are provided at the end. 
-- H2 console link - http://127.0.0.1:8081/api/v1/h2-console/
+- Please check the API Documentation for sample APIs.
 
 ### REST APIs
-
 * [API Documentation](https://documenter.getpostman.com/view/15062221/TzCFgqZY)
-
 
 #### Notes
  * Email is sent when vaccination is scheduled.
